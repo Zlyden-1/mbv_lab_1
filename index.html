@@ -8,7 +8,13 @@
 </head>
 
 <body>
-    <input id="input" type="file">
+    <div style="display: inline-flex;">
+        <input id="input" type="file">
+        <select id="interpolation">
+            <option value="nearest-neighbour">Метод БС</option>
+            <option value="bilinear-interpolation">Билинейная интерполяция</option>
+        </select>
+    </div>
     <div style="height: 82vh; display: flex; align-items: center; justify-content: space-evenly;">
       <div id="picture__container" style="overflow-y: scroll; height: 100%; cursor: crosshair;">
       </div>

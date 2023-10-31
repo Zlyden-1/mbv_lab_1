@@ -26,10 +26,13 @@ const addZoomBounds = () => {
         zoomBounds.remove();
     }
     if (typeof pictureParams != 'undefined'){
+        zoomCtx.clearRect(0, 0, pictureParams[0], pictureParams[0])
         zoomLevel = zoomInput.value;
         const width = pictureParams[0];
         const height = pictureParams[1];
-        const size = parseInt(width/zoomLevel);
+        // const size = parseInt(width/zoomLevel);
+        const interpolationUnitSize = 2*zoomLevel-1 // размер фрагмента 2х2 пиксела после интерполяции
+        const size = parseInt((width-1)/(interpolationUnitSize-1))+1
         zoomAreaParams.size = size;
         const halfSize = parseInt(size/2);
         const bounding = pictureContainer.getBoundingClientRect();
@@ -60,7 +63,7 @@ const addZoomBounds = () => {
             else if (zoomAreaParams.top >= width - size) zoomAreaParams.top = height - size - 1;
             zoomBounds.style.left = left + 'px'; // задаём элементу позиционирование слева
             zoomBounds.style.top = top + 'px'; // задаём элементу позиционирование сверху
-            // displayZoom(e)
+            displayZoom(e)
         })
     }
 }
@@ -96,16 +99,20 @@ const drawPicture = (ctx, width, height, data) => {
     ctx.putImageData(imageData, 0, 0);
 }
 
-
-const displayPicture = () => {
-    pictureDataWithOffset = [];
-    const bitOffset = offset.value;
-    for (let i = 0; i < pictureData.length; i++) {
-        pictureDataWithOffset.push([]);
-        for (let j = 0; j < pictureData[i].length; j++) {
-            pictureDataWithOffset[i][j] = (pictureData[i][j] >> bitOffset) & 0xFF;
+const applyOffset = (data, offsetValue) => {
+    const dataWithOffset = []
+    for (let i = 0; i < data.length; i++) {
+        dataWithOffset.push([]);
+        for (let j = 0; j < data[i].length; j++) {
+            dataWithOffset[i][j] = (data[i][j] >> offsetValue) & 0xFF;
         }
     }
+    return dataWithOffset
+}
+
+const displayPicture = () => {
+    const bitOffset = offset.value;
+    pictureDataWithOffset = applyOffset(pictureData, bitOffset)
     drawPicture(pictureCtx, pictureParams[0], pictureParams[1], pictureDataWithOffset)
 }
 
@@ -153,7 +160,7 @@ const bilinearyInterpolate = (left, top, size, zoomLevel, data) => {
     if (left < 0) left = 0;
     if (top < 0) top = 0;
     const interpolationUnitSize = 2*zoomLevel-1 // размер фрагмента 2х2 пиксела после интерполяции
-    const zoomedSize = zoomLevel*size-1
+    const zoomedSize = (interpolationUnitSize-1)*(size-1)+1
     const zoomedData = []
     for (let j = 0; j < zoomedSize; j++){
         zoomedData.push([])
@@ -166,24 +173,33 @@ const bilinearyInterpolate = (left, top, size, zoomLevel, data) => {
             const Itr = data[i][j+1] // яркость верхней правой точки новой системы координат
             const Ibl = data[i+1][j] // яркость нижней левой точки новой системы координат
             const Ibr = data[i+1][j+1] // яркость нижней правой точки новой системы координат
-            for (let n = rowIndex; n < rowIndex+interpolationUnitSize-1; n++){
+            for (let n = rowIndex; n < rowIndex+interpolationUnitSize; n++){
                 const y = n%interpolationUnitSize/interpolationUnitSize
-                for (let m = columnIndex; m < columnIndex+interpolationUnitSize-1; m++){
+                for (let m = columnIndex; m < columnIndex+interpolationUnitSize; m++){
                     const x = m%interpolationUnitSize/interpolationUnitSize
                     const brightness = Itl*(1-x)*(1-y)+Itr*(1-y)*x+Ibl*(1-x)*y+Ibr*x*y
-                    zoomedData[n].push(brightness)
+                    zoomedData[n][m]=Math.round(brightness)
                 }
             }
             columnIndex+=interpolationUnitSize-1
         }
-        
         rowIndex+=interpolationUnitSize-1
     }
-    console.log(zoomedData);
     return {zoomedData, zoomedSize}
 }
 
+const normalize = (data) => {
+    maxBrightness = Math.max.apply(null, data.map((x)=>Math.max.apply(null, x)))
+    minBrightness = Math.min.apply(null, data.map((x)=>Math.min.apply(null, x)))
+    delta = maxBrightness - minBrightness
+    normalizedUnit = delta/0xFF
+    normalizedData = data.map((x)=>x.map((y)=>(y-minBrightness)*normalizedUnit))
+    return normalizedData
+}
+
 const displayZoom = (event) => {
-    const {zoomedData, zoomedSize} = bilinearyInterpolate(zoomAreaParams.left, zoomAreaParams.top, zoomAreaParams.size, zoomLevel, pictureDataWithOffset)
-    drawPicture(zoomCtx, zoomedSize, zoomedSize, zoomedData)
+    const {zoomedData, zoomedSize} = bilinearyInterpolate(zoomAreaParams.left, zoomAreaParams.top, zoomAreaParams.size, zoomLevel, pictureData)
+    const normalizedData = normalize(zoomedData)
+    const finalData = applyOffset(normalizedData, offset.value)
+    drawPicture(zoomCtx, zoomedSize, zoomedSize, finalData)
 } 
