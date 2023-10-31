@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>ЛР 1 Авдошин 109</title>
+</head>
+
+<body>
+    <input id="input" type="file">
+    <div style="height: 82vh; display: flex; align-items: center; justify-content: space-evenly;">
+      <div id="picture__container" style="overflow-y: scroll; height: 100%; cursor: crosshair;">
+      </div>
+      <div id="zoom__container" style="overflow-y: scroll;">
+      </div>
+    </div>
+    
+    <div>
+        <div style="display: flex; align-items: center; justify-content: space-evenly;">
+          <div>
+            <div>Сдвиг битов</div>
+            <input id="offset" type="range" min="0" max="2" value=0 list="offset__markers">
+            <datalist id="offset__markers">
+              <option value="0" label="0" ></option>
+              <option value="1" label="1"></option>
+              <option value="2" label="2"></option>
+            </datalist>
+          </div>
+          <div style="width: 25%">
+            <div>Увеличение</div>
+            <input id="zoom__input" type="range" min="1" max="10" value=1 list="zoom__markers" style="width: 100%;">
+            <datalist id="zoom__markers" style="width: 100%;">
+              <option value="1" label="1"></option>
+              <option value="2" label="2"></option>
+              <option value="3" label="3"></option>
+              <option value="4" label="4"></option>
+              <option value="5" label="5"></option>
+              <option value="6" label="6"></option>
+              <option value="7" label="7"></option>
+              <option value="8" label="8"></option>
+              <option value="9" label="9"></option>
+              <option value="10" label="10"></option>
+            </datalist>
+          </div>
+        </div>
+        <fieldset display="inline">
+            <legend>Позиция курсора</legend>
+            <label>X: </label>
+            <input id="x" disabled>
+            <label>Y: </label>
+            <input id="y" disabled>
+            <label>Яркость: </label>
+            <input id="brightness" disabled>
+        </fieldset>
+    </div>
+
+    <script src="./render.js"></script>
+	  <script src="./main.js"></script>
+	  <style>
+	    datalist {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 200px;
+      }
+
+      option {
+        padding: 0;
+      }
+
+      input[type="range"] {
+        width: 200px;
+        margin: 0;
+      }
+	  </style>
+</body>
+
+</html>

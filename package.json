@@ -1,0 +1,16 @@
+{
+  "name": "LR_1",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Max Avdoshin",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder build",
+    "wbuild": "electron-builder build --win"
+  },
+  "devDependencies": {
+    "electron": "^26.2.4",
+    "electron-builder": "^24.6.4"
+  }
+}
