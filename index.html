@@ -8,17 +8,25 @@
 </head>
 
 <body>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div id="overview__container" style="height: 750px; cursor: crosshair; margin: auto;">
+        </div>
+        <div>
     <div style="display: inline-flex;">
         <input id="input" type="file">
         <select id="interpolation">
             <option value="nearest-neighbour">Метод БС</option>
             <option value="bilinear-interpolation">Билинейная интерполяция</option>
         </select>
+        <select id="normalization">
+          <option value="false">Не нормировать</option>
+          <option value="true">Нормировать</option>
+      </select>
     </div>
-    <div style="height: 82vh; display: flex; align-items: center; justify-content: space-evenly;">
+    <div style="height: 78vh; display: flex; align-items: center; justify-content: space-evenly;">
       <div id="picture__container" style="overflow-y: scroll; height: 100%; cursor: crosshair;">
       </div>
-      <div id="zoom__container" style="overflow-y: scroll;">
+      <div id="zoom__container">
       </div>
     </div>
     
@@ -35,9 +43,8 @@
           </div>
           <div style="width: 25%">
             <div>Увеличение</div>
-            <input id="zoom__input" type="range" min="1" max="10" value=1 list="zoom__markers" style="width: 100%;">
+            <input id="zoom__input" type="range" min="2" max="10" value=2 list="zoom__markers" style="width: 100%;">
             <datalist id="zoom__markers" style="width: 100%;">
-              <option value="1" label="1"></option>
               <option value="2" label="2"></option>
               <option value="3" label="3"></option>
               <option value="4" label="4"></option>
@@ -60,6 +67,8 @@
             <input id="brightness" disabled>
         </fieldset>
     </div>
+</div>
+</div>
 
     <script src="./render.js"></script>
 	  <script src="./main.js"></script>

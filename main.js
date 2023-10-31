@@ -1,5 +1,6 @@
 const pictureContainer = document.getElementById("picture__container");
 const zoomContainer = document.getElementById("zoom__container");
+const overviewContainer = document.getElementById("overview__container");
 const offset = document.getElementById("offset");
 const input = document.getElementById("input");
 const zoomInput = document.getElementById("zoom__input");
@@ -7,7 +8,7 @@ const xField = document.getElementById("x");
 const yField = document.getElementById("y");
 const brightnessField = document.getElementById("brightness");
 const zoomAreaParams = {left: 0, top: 0, size: 0}
-let fileDataBuffer, pictureParams, pictureData, picture, pictureCtx, zoom, zoomCtx, zoomBounds, zoomLevel, pictureDataWithOffset;
+let fileDataBuffer, pictureParams, pictureData, picture, pictureCtx, zoom, zoomCtx, zoomBounds, zoomLevel, pictureDataWithOffset, overview, overviewCtx, sizeModifier;
 let fixZoomArea = false;
 
 const pickCoordinates = (event) => {
@@ -110,9 +111,28 @@ const applyOffset = (data, offsetValue) => {
     return dataWithOffset
 }
 
+const makeOverview = (data, modifier) => {
+    const intModifier = parseInt(1/modifier)
+    const overviewData = []
+    let rowIndex = 0
+    for (let i = 0; i < data.length; i+=intModifier){
+        let columnIndex = 0;
+        overviewData.push([]);
+        for (let j = 0; j < data[i].length; j+=intModifier){
+            overviewData[rowIndex][columnIndex] = data[i][j]
+            columnIndex++
+        }
+        rowIndex++
+    }
+    console.log(overviewData);
+    return overviewData
+}
+
 const displayPicture = () => {
     const bitOffset = offset.value;
     pictureDataWithOffset = applyOffset(pictureData, bitOffset)
+    const overviewData = makeOverview(pictureDataWithOffset, sizeModifier)
+    drawPicture(overviewCtx, parseInt(pictureParams[0]*sizeModifier), parseInt(pictureParams[1]*sizeModifier), overviewData)
     drawPicture(pictureCtx, pictureParams[0], pictureParams[1], pictureDataWithOffset)
 }
 
@@ -148,6 +168,13 @@ input.onchange = async () => {
     zoom.style.overflowY = "scroll";
     zoomCtx = zoom.getContext("2d");
     zoomContainer.appendChild(zoom);
+    if (typeof overview != 'undefined') overview.remove()
+    overview = document.createElement("canvas");
+    sizeModifier = overviewContainer.offsetHeight/pictureParams[1]
+    overview.width = parseInt(pictureParams[0]*sizeModifier);
+    overview.height = overviewContainer.offsetHeight;
+    overviewCtx = overview.getContext("2d");
+    overviewContainer.appendChild(overview);
     displayPicture();
     addZoomBounds();
 }
